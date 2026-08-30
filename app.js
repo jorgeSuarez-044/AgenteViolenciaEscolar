@@ -689,7 +689,7 @@ Reglas clave:
                 message.className = 'flex gap-3 animate-fade-in';
                 message.innerHTML = `
                     <div class="w-11 h-11 rounded-full bg-transparent border-2 border-primary/30 flex flex-shrink-0 shadow-md overflow-hidden p-0.5">
-                        <img src="XuJuDXrePh.gif" alt="Bot" class="w-full h-full object-cover rounded-full" style="background: transparent;">
+                        <img src="xujudxreph.gif" alt="Bot" class="w-full h-full object-cover rounded-full" style="background: transparent;">
                     </div>
                     <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-md border border-slate-100 max-w-[85%]">
                         <p class="message-text text-slate-700 text-sm leading-relaxed">${escapedContent}</p>
@@ -799,7 +799,7 @@ Reglas clave:
             faqContainer.className = 'flex gap-3 animate-fade-in';
             faqContainer.innerHTML = `
                 <div class="w-14 h-14 rounded-full bg-transparent border border-primary/20 flex flex-shrink-0 shadow-md overflow-hidden" style="padding: 2px;">
-                    <img src="XuJuDXrePh.gif" alt="Bot FAQ" class="w-full h-full object-cover rounded-full" style="background: transparent;">
+                    <img src="xujudxreph.gif" alt="Bot FAQ" class="w-full h-full object-cover rounded-full" style="background: transparent;">
                 </div>
                 <div class="bg-primary/5 rounded-2xl rounded-tl-md px-4 py-3 border border-primary/20 max-w-[85%]">
                     <h4 class="text-primary font-semibold text-sm mb-2"><i class="fas fa-question-circle mr-1"></i> Preguntas frecuentes:</h4>
