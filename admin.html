@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Anti-Violencia Escolar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at 100% 0%, #eef2f7 0%, #f4f6f9 40%, #ffffff 100%); }
+        .hidden { display: none !important; }
+    </style>
+
+    <style>
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 8px;
+            color: #cbd5e1; /* slate-300 */
+        }
+        
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.25);
+            border-bottom: 4px solid rgba(0, 0, 0, 0.4);
+            color: #ffffff;
+        }
+
+        .tab-btn:active {
+            transform: translateY(2px);
+            border-bottom: 0px solid transparent;
+            margin-top: 3px;
+            margin-bottom: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .tab-btn.bg-blue-500\/20 {
+            /* Active tab override */
+            background: rgba(37, 99, 235, 0.2) !important;
+            border-color: rgba(37, 99, 235, 0.4) !important;
+            color: #60a5fa !important;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- Pantalla de Login -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center bg-gray-100">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-96 border border-blue-50">
+            <h2 class="text-2xl font-bold text-center text-blue-800 mb-6"><i class="fas fa-lock"></i> Acceso Administrativo</h2>
+            <div id="loginError" class="hidden bg-red-100 text-red-600 p-3 rounded mb-4 text-sm text-center">Usuario o contraseña incorrectos</div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="username">Usuario</label>
+                <input class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-700" id="username" type="text" placeholder="admin">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Contraseña</label>
+                <input class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-700" id="password" type="password" placeholder="••••••••">
+            </div>
+            <button id="btnLogin" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-lg shadow-blue-200">
+                Iniciar Sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- Pantalla del Dashboard -->
+    <div id="dashboardSection" class="hidden min-h-screen bg-gray-50 flex">
+        
+        <!-- Sidebar Izquierdo -->
+        <aside class="w-64 bg-slate-900 shadow-2xl flex flex-col transition-all duration-300 relative z-20 hidden sm:flex text-slate-300" id="sidebar">
+            <div class="h-20 flex items-center px-6 border-b border-white/10 font-bold text-white text-lg tracking-wide">
+                <img src="redes-sociales.gif" alt="Logo" class="w-10 h-10 mr-3 object-cover rounded-md bg-white p-1"> Panel Admin
+            </div>
+            
+            <nav class="flex-1 p-4 space-y-2">
+                <!-- Menu Item -->
+                <div class="space-y-1">
+                    <button id="btnGestionCasos" class="w-full flex items-center justify-between px-4 py-3 text-slate-200 font-semibold rounded-xl hover:bg-white/5 hover:text-white transition group focus:outline-none">
+                        <span class="flex items-center gap-3"><i class="fas fa-folder-open w-5 text-blue-400 group-hover:text-blue-300 transition"></i>Casos Ley 1620</span>
+                        <i class="fas fa-chevron-down text-sm transition-transform text-slate-500 group-hover:text-slate-300" id="chevronCasos"></i>
+                    </button>
+                    <!-- Submenu Dropdown -->
+                    <div id="submenuCasos" class="space-y-2 pl-4 pr-2 pb-2 mt-2 border-l border-white/5 ml-4">
+                        <button class="tab-btn w-full text-left px-4 py-2 text-sm text-blue-400 bg-blue-500/10 font-semibold rounded-lg border-l-2 border-blue-400 transition flex items-center gap-2" data-target="activos">
+                            <i class="fas fa-clock w-4"></i> Pendientes / Activos
+                        </button>
+                        <button class="tab-btn w-full text-left px-4 py-2 text-sm text-slate-400 font-medium rounded-lg hover:bg-white/5 hover:text-slate-200 transition border-l-2 border-transparent flex items-center gap-2" data-target="cerrados">
+                            <i class="fas fa-check-circle w-4"></i> Terminados / Cerrados
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="p-4 border-t border-white/10 text-center text-xs text-slate-500">
+                &copy; <span id="adminYear"></span> Plataforma Anti-Violencia
+                <script>document.getElementById('adminYear').textContent = new Date().getFullYear();</script>
+            </div>
+        </aside>
+
+        <!-- Main Content (Derecha) -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <!-- Header superior transparente -->
+            <header class="h-16 bg-white shadow-sm flex justify-between items-center px-8 border-b border-gray-100">
+                 <div class="flex items-center">
+                     <button class="sm:hidden mr-4 text-gray-500" id="btnToggleMenu"><i class="fas fa-bars text-lg"></i></button>
+                     <h2 class="text-xl font-bold text-gray-800" id="currentViewTitle">Control de Casos Pendientes</h2>
+                 </div>
+                 <div class="flex items-center gap-3 relative">
+                     <button id="userMenuBtn" class="flex items-center gap-2 focus:outline-none hover:opacity-80 transition">
+                         <div class="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-white font-bold text-sm shadow">A</div>
+                         <span class="text-sm font-semibold text-gray-600 hidden sm:block">Administrador</span>
+                         <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                     </button>
+                     
+                     <!-- Pop-up Cerrar Sesión -->
+                     <div id="userMenuDropdown" class="hidden absolute top-10 right-0 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                         <div class="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
+                             <p class="text-sm font-semibold text-gray-800">Administrador</p>
+                             <p class="text-xs text-gray-500">Sesión Activa</p>
+                         </div>
+                         <button id="btnLogout" class="w-full text-left px-4 py-3 text-sm text-red-600 font-bold hover:bg-red-50 flex items-center gap-2 transition">
+                             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                         </button>
+                     </div>
+                 </div>
+            </header>
+
+            <main class="flex-1 overflow-auto p-4 sm:p-8">
+                <!-- Tabla envuelta redondeada -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="p-4 text-sm font-semibold text-gray-600">Radicado</th>
+                                <th class="p-4 text-sm font-semibold text-gray-600">Fecha</th>
+                                <th class="p-4 text-sm font-semibold text-gray-600">Tipo de Violencia</th>
+                                <th class="p-4 text-sm font-semibold text-gray-600">Institución</th>
+                                <th class="p-4 text-sm font-semibold text-gray-600">Involucrados</th>
+                                <th class="p-4 text-sm font-semibold text-gray-600">Estado</th>
+                                <th class="p-4 text-sm font-semibold text-gray-600">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="casosTbody">
+                            <tr><td colspan="7" class="p-4 text-center text-gray-500">Cargando casos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Detalles -->
+    <div id="modalDetalles" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800" id="modalRadicado">Detalles del Caso</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4" id="modalBody">
+                <!-- Se inyecta info vía JS -->
+            </div>
+            <div class="p-6 border-t bg-gray-50 flex justify-end gap-3" id="modalActions">
+                <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300" id="btnCerrarModal">Cerrar</button>
+                <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-bold" id="btnMarcarCerrado">Marcar como Cerrado</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Virtual Anti-Violencia Escolar - Duitama</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    primary: '#6d28d9',
+                    'primary-dark': '#4c1d95',
+                    secondary: '#2563eb',
+                    accent: '#8b5cf6',
+                    success: '#10b981',
+                    danger: '#ef4444'
+                },
+                boxShadow: {
+                    'glass': '0 20px 40px -15px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.6) inset',
+                    'glass-hover': '0 25px 50px -12px rgba(124, 58, 237, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8) inset',
+                    '3d': '0 10px 25px -5px rgba(109, 40, 217, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+                },
+                animation: { 
+                    'pulse-slow': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite', 
+                    'bounce-subtle': 'bounce 1s ease-in-out infinite',
+                    'float-slow': 'floatSlow 6s ease-in-out infinite'
+                },
+                keyframes: {
+                    floatSlow: {
+                        '0%, 100%': { transform: 'translateY(0px)' },
+                        '50%': { transform: 'translateY(-10px)' }
+                    }
+                }
+            }}
+        }
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6d28d9;
+            --primary-dark: #4c1d95;
+            --secondary: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --purple: #8b5cf6;
+            --teal: #0d9488;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(13, 148, 136, 0.06) 0px, transparent 50%),
+                #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-left: 260px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        
+        /* Sidebar Main Menu 3D Glassmorphism */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            color: white;
+            padding: 2rem 1.25rem;
+            box-shadow: 
+                10px 0 30px -5px rgba(0, 0, 0, 0.4),
+                1px 0 0 0 rgba(255, 255, 255, 0.1) inset;
+            display: flex;
+            flex-direction: column;
+            z-index: 2000;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .sidebar .logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            gap: 10px;
+        }
+
+        .sidebar .logo img { border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        .sidebar .logo h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .sidebar nav {
+            flex: 1;
+        }
+
+        .sidebar nav ul {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+        }
+
+        /* Accessibility Toolbar */
+        /* Floating Accessibility Sphere 3D */
+        .accessibility-sphere-container {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column-reverse; /* Menu expands upwards */
+            align-items: flex-start;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .accessibility-sphere {
+            pointer-events: auto; /* Enable clicks on the sphere */
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #0ea5e9, #0284c7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 
+                0 10px 25px -5px rgba(2, 132, 199, 0.5),
+                0 8px 10px -6px rgba(0, 0, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: floatAcc3D 4s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes floatAcc3D {
+            0%, 100% { transform: translateY(0) rotate(0deg); box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3); }
+            50% { transform: translateY(-8px) rotate(-2deg); box-shadow: 0 18px 30px -5px rgba(2, 132, 199, 0.6), 0 14px 15px -6px rgba(0, 0, 0, 0.25); }
+        }
+
+        .accessibility-sphere:hover {
+            transform: scale(1.1) translateY(-4px) rotate(8deg);
+            box-shadow: 
+                0 20px 35px -5px rgba(14, 165, 233, 0.7),
+                0 12px 18px -6px rgba(0, 0, 0, 0.35),
+                inset 0 3px 6px rgba(255, 255, 255, 0.6);
+        }
+
+        .accessibility-sphere:active {
+            transform: scale(0.95) translateY(2px);
+        }
+
+        .accessibility-menu {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 22px;
+            padding: 16px;
+            box-shadow: 
+                0 20px 40px -10px rgba(15, 23, 42, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform: scale(0);
+            transform-origin: bottom left; /* Expansion from bottom left */
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .accessibility-sphere-container.active .accessibility-menu {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: auto; /* Enable clicks when menu is open */
+        }
+
+        .acc-slider-container {
+            width: 160px;
+            padding: 5px 10px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .acc-slider-container input[type="range"] {
+            width: 100%;
+        }
+
+        .acc-btn {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            width: 160px;
+        }
+
+        .acc-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .acc-btn i { font-size: 1rem; }
+
+        /* High Contrast Mode */
+        .high-contrast {
+            filter: contrast(1.2) brightness(0.9);
+            background: #000 !important;
+        }
+        .high-contrast body { background: #000 !important; color: #fff !important; }
+        .high-contrast * { border-color: #fff !important; }
+        .high-contrast .sidebar, .high-contrast header, .high-contrast footer { background: #111 !important; }
+        .high-contrast .btn, .high-contrast .legal-card { background: #222 !important; color: #fff !important; border: 1px solid #fff !important; }
+
+
+        /* Emoji Picker */
+        #emojiPicker {
+            position: absolute;
+            bottom: 70px;
+            right: 15px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1001;
+            display: none;
+        }
+        .emoji-item {
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .emoji-item:hover { background: #f0f0f0; }
+
+        
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* bouncy */
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            
+            /* Glassmorphism 3D */
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-bottom: 3px solid rgba(0, 0, 0, 0.25) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+        }
+
+        .sidebar nav a:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15), inset 0 2px 2px rgba(255, 255, 255, 0.5) !important;
+            border-bottom: 4px solid rgba(0, 0, 0, 0.2) !important;
+            color: #ffffff;
+        }
+
+        .sidebar nav a:active {
+            transform: translateY(2px) !important;
+            border-bottom: 0px solid rgba(0, 0, 0, 0) !important;
+            margin-top: 3px !important;
+            margin-bottom: 5px !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+        }
+
+        .sidebar nav a i { width: 24px; text-align: center; margin-right: 12px; font-size: 1.2rem; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); }
+
+        .btn-guia-tour {
+            background: linear-gradient(135deg, var(--secondary), var(--primary-dark)) !important;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            color: white !important;
+        }
+        .btn-guia-tour:hover {
+            transform: scale(1.05);
+        }
+        .btn-admin {
+            background: white !important;
+            color: #000000 !important;
+            margin-top: 10px;
+            border: none;
+            display: flex;
+            justify-content: center;
+            font-weight: 900 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-admin i { color: #000000 !important; }
+
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(15, 31, 51, 0.92), rgba(30, 58, 95, 0.85)), url('https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') center/cover;
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background-color: #1e40af;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #0f1f33;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Legal Framework Section */
+        .legal-framework {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .section-title p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Legal Cards Modernas 3D Glass */
+        .legal-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 2.5rem;
+        }
+
+        .legal-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(226, 232, 240, 0.8) inset;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-left: 5px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .legal-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 40px -12px rgba(124, 58, 237, 0.25), 0 0 0 1px rgba(124, 58, 237, 0.3) inset;
+            background: #ffffff;
+        }
+
+        .legal-card.active {
+            border-left-color: var(--primary);
+            background: linear-gradient(135deg, rgba(245, 243, 255, 0.95), rgba(255, 255, 255, 0.98));
+            box-shadow: 0 20px 35px -10px rgba(109, 40, 217, 0.2), 0 0 0 1.5px rgba(124, 58, 237, 0.4) inset;
+        }
+
+        .legal-card.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--primary);
+        }
+
+        .legal-card-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .legal-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .legal-card p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        .legal-card-year {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: var(--secondary);
+            color: white;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .legal-content {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            animation: fadeIn 0.5s;
+        }
+
+        .legal-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .legal-content h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .legal-content h4 {
+            color: var(--secondary);
+            margin: 1.5rem 0 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .legal-content p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .legal-content ul {
+            padding-left: 20px;
+            margin-bottom: 1rem;
+        }
+
+        .legal-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .legal-article {
+            background-color: #f0f7ff;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .legal-article h5 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .legal-article p {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 0;
+        }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .chatbot-toggle {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            animation: none;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+        }
+
+        .chatbot-box {
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            width: 400px;
+            height: 550px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .chatbot-close:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            animation: fadeIn 0.5s;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 15px;
+            border-radius: 18px;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message.bot .message-content {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .bot-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .typing-indicator {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            width: fit-content;
+            margin-bottom: 20px;
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background-color: #999;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .chatbot-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: white;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            padding: 12px 20px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .chatbot-input input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 58, 110, 0.1);
+        }
+
+        .chatbot-input button {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .chatbot-input button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Quick Replies */
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-reply {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .quick-reply:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Tabla Consultar Casos */
+        .tabla-casos {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .tabla-casos thead tr {
+            background: linear-gradient(135deg, var(--primary), #0284c7);
+            color: white;
+        }
+        
+        .tabla-casos th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .tabla-casos tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s;
+        }
+        
+        .tabla-casos tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .tabla-casos tbody td {
+            padding: 14px 16px;
+            font-size: 0.95rem;
+        }
+        
+        .badge-estado {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-registrado { background: #dbeafe; color: #1d4ed8; }
+        .badge-en_atencion { background: #fef3c7; color: #b45309; }
+        .badge-escalado { background: #fee2e2; color: #b91c1c; }
+        .badge-cerrado { background: #d1fae5; color: #047857; }
+        
+        .paginacion-casos .btn-pag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .paginacion-casos .btn-pag:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .paginacion-casos .btn-pag:hover:not(:disabled) {
+            background: #f0f9ff;
+            border-color: var(--primary);
+        }
+
+        /* Email Notification */
+        .email-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 3000;
+            animation: slideIn 0.5s, slideOut 0.5s 4.5s;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .email-notification .icon {
+            margin-right: 10px;
+        }
+
+        /* Email Status */
+        .email-status {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 4000;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .email-status.show {
+            display: block;
+        }
+
+        .email-status-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .email-status.success .email-status-icon {
+            color: var(--success);
+        }
+
+        .email-status.error .email-status-icon {
+            color: var(--danger);
+        }
+
+        .email-status h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .email-status p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .email-status button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 4rem 0;
+            background: linear-gradient(180deg, #f8f9fa 0%, #eef2f7 100%);
+        }
+
+        .contact-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #0d2d5a;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        /* Responsive */
+        /* Vertical Aladdin Effect & Responsive Sidebar */
+        @media (max-width: 900px) {
+            body { padding-left: 80px; padding-bottom: 0; }
+            .sidebar {
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 80px;
+                height: 100vh;
+                flex-direction: column;
+                padding: 1.5rem 0;
+                z-index: 2000;
+                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                overflow-x: hidden;
+            }
+            .sidebar:hover {
+                width: 280px;
+            }
+            .sidebar .logo {
+                padding: 0 10px;
+                width: 100%;
+            }
+            .sidebar .logo h1 { 
+                opacity: 0;
+                visibility: hidden;
+                white-space: nowrap;
+                transition: opacity 0.2s ease;
+                position: absolute;
+                left: 70px;
+            }
+            .sidebar:hover .logo h1 {
+                opacity: 1;
+                visibility: visible;
+                position: static;
+            }
+            .sidebar .logo img {
+                width: 45px !important;
+                height: 45px !important;
+                margin: 0 auto;
+            }
+            .sidebar nav ul {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .sidebar nav a {
+                width: 100%;
+                padding: 12px 24px; /* Centers the 28px icon within 80px: (80-28)/2 = 26px approx */
+                justify-content: flex-start;
+                display: flex;
+                align-items: center;
+                transition: all 0.3s ease;
+            }
+            .sidebar:hover nav a {
+                padding: 12px 18px;
+            }
+            .sidebar nav a span {
+                opacity: 0;
+                visibility: hidden;
+                white-space: nowrap;
+                transition: opacity 0.2s ease;
+                pointer-events: none;
+                margin-left: 20px;
+            }
+            .sidebar:hover nav a span {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+            .sidebar nav a i {
+                min-width: 28px;
+                display: flex;
+                justify-content: center;
+                font-size: 1.3rem;
+                flex-shrink: 0;
+            }
+            .sidebar .logo h1 {
+                opacity: 0;
+                visibility: hidden;
+                position: absolute;
+                pointer-events: none;
+            }
+            .sidebar:hover .logo h1 {
+                opacity: 1;
+                visibility: visible;
+                position: static;
+                pointer-events: auto;
+            }
+        }
+
+        /* Aladdin Effect (Magnification) & 3D Glassmorphism */
+        .sidebar nav ul {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .sidebar nav li {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar nav a {
+            position: relative;
+            display: flex;
+            align-items: center;
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding: 12px 16px;
+            font-size: 0.92rem;
+            
+            /* 3D Glassmorphism Premium */
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 14px;
+        }
+
+        .sidebar nav li:hover a {
+            transform: translateX(8px) scale(1.04);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.6), rgba(37, 99, 235, 0.6));
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+            color: #ffffff;
+        }
+
+        .sidebar nav a i { 
+            width: 26px; 
+            text-align: center; 
+            margin-right: 12px; 
+            font-size: 1.15rem; 
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .sidebar nav a:hover i {
+            transform: scale(1.2);
+            color: #ffffff;
+        }
+
+        .btn-guia-tour {
+            background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+            border-color: rgba(255, 255, 255, 0.25) !important;
+        }
+        .btn-admin {
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: #6d28d9 !important;
+            font-weight: 800 !important;
+        }
+        .btn-admin i {
+            color: #6d28d9 !important;
+        }
+
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .chatbot-box {
+                width: 90%;
+                right: 5%;
+                height: 70vh;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        .btn-guia-tour {
+            background: linear-gradient(135deg, #2563eb, #0f1f33);
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-guia-tour:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    
+        /* Accessibility Toolbar */
+        .accessibility-toolbar {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            overflow: hidden;
+            z-index: 2000;
+        }
+
+        .accessibility-toolbar button {
+            background: transparent;
+            border: none;
+            padding: 12px;
+            font-size: 1.2rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .accessibility-toolbar button:last-child {
+            border-bottom: none;
+        }
+
+        .accessibility-toolbar button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* High Contrast Theme (Color Blind Friendly) */
+        body.high-contrast {
+            --primary: #005b96 !important;
+            --primary-dark: #03396c !important;
+            --danger: #ff7c43 !important; /* Orange instead of Red */
+            --success: #005b96 !important; /* Deep blue instead of Green */
+            --purple: #665191 !important;
+            
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+        
+        body.high-contrast * {
+            letter-spacing: 0.5px;
+        }
+        
+        body.high-contrast, body.high-contrast * {
+            color: #000000 !important;
+            text-shadow: none !important;
+        }
+        
+        body.high-contrast section {
+            background: #fdfdfd !important;
+            border-bottom: 3px dashed #bbbbbb !important;
+        }
+        
+        body.high-contrast .glass-card, body.high-contrast .legal-card, body.high-contrast .bg-white {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+        
+        body.high-contrast a {
+            color: #005b96 !important;
+            text-decoration: underline !important;
+            font-weight: 700 !important;
+        }
+        
+        body.high-contrast .sidebar {
+            background: #f4f4f4 !important;
+            border-right: 3px solid #000000;
+        }
+        
+        body.high-contrast .sidebar * {
+            color: #000000 !important;
+        }
+        
+        body.high-contrast .accessibility-toolbar {
+            background: #ffffff !important;
+            border: 2px solid #000000;
+            border-right: none;
+        }
+        
+        body.high-contrast .accessibility-toolbar button {
+            color: #000000 !important;
+            border-bottom: 2px solid #000000 !important;
+        }
+        body.high-contrast .btn-primary {
+            background: #000000 !important;
+            color: #ffffff !important;
+            border: 2px solid #000000 !important;
+        }
+        body.high-contrast .btn-admin, body.high-contrast .btn-guia-tour {
+            background: #000000 !important;
+            color: #ffffff !important;
+            border: 2px solid #000000 !important;
+        }
+        body.high-contrast .badge-estado {
+            border: 2px solid #000000 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Accessibility Floating Sphere -->
+    <div class="accessibility-sphere-container" id="accContainer">
+        <div class="accessibility-sphere" id="accSphere" title="Opciones de Accesibilidad">
+            <i class="fas fa-universal-access"></i>
+        </div>
+        <div class="accessibility-menu">
+            <button id="increaseFont" class="acc-btn"><i class="fas fa-plus"></i> Aumentar Letra</button>
+            <button id="decreaseFont" class="acc-btn"><i class="fas fa-minus"></i> Disminuir Letra</button>
+            <button id="toggleContrast" class="acc-btn"><i class="fas fa-adjust"></i> Contraste</button>
+            <button id="toggleGlobalAudio" class="acc-btn"><i class="fas fa-volume-up"></i> Silenciar Todo</button>
+            <div class="acc-slider-container">
+                <label for="voiceRate" class="text-[10px] font-bold text-gray-500 uppercase">Velocidad Voz: <span id="voiceRateVal">0.9</span>x</label>
+                <input type="range" id="voiceRate" min="0.5" max="2.0" step="0.1" value="0.9">
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+        <!-- Sidebar Menu -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="redes-sociales.gif" alt="Logo Redes Sociales" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: white; padding: 2px;">
+            <h1>Anti-Violencia</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#home"><i class="fas fa-home"></i> <span>Inicio</span></a></li>
+                <li><a href="#legal"><i class="fas fa-scale-balanced"></i> <span>Marco Legal</span></a></li>
+                <li><a href="javascript:void(0)" id="openSiuceSidebar"><i class="fas fa-shield-halved"></i> <span>Reporte SIUCE</span></a></li>
+                <li><a href="#estadisticas"><i class="fas fa-chart-pie"></i> <span>Estadísticas</span></a></li>
+                <li><a href="#consultar-casos"><i class="fas fa-magnifying-glass"></i> <span>Consultar</span></a></li>
+                <li><a href="#contact"><i class="fas fa-paper-plane"></i> <span>Contacto</span></a></li>
+                <li><a href="javascript:void(0)" id="btnGuiaBotHeader" class="btn-guia-tour"><i class="fas fa-route text-white"></i> <span>Guía Interactiva</span></a></li>
+                <li><a href="admin.html" class="btn-admin"><i class="fas fa-user-shield text-primary"></i> <span>Admin Panel</span></a></li>
+            </ul>
+        </nav>
+        
+
+    </aside>
+
+    <!-- Hero Section con Tailwind & 3D Glassmorphism -->
+    <section id="home" class="relative py-20 px-4 overflow-hidden rounded-b-3xl bg-gradient-to-br from-slate-900 via-primary-dark to-purple-950 text-white shadow-2xl">
+        <!-- Resplandores de fondo (Ambient Glows) -->
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-5xl mx-auto text-center relative z-10 space-y-6">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-purple-200 text-xs font-semibold uppercase tracking-wider shadow-inner animate-float-slow">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                Plataforma Inteligente Ley 1620 • Duitama
+            </div>
+
+            <h2 class="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-purple-200 drop-shadow-sm">
+                Asistente Virtual de Apoyo Anti-Violencia Escolar
+            </h2>
+
+            <p class="text-base md:text-xl text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
+                Un espacio seguro, confidencial y respaldado por IA con experticia en normativa colombiana para estudiantes, padres y educadores.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+                <button class="px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-base shadow-3d hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3" id="openChatbot">
+                    <i class="fas fa-robot text-lg"></i> Hablar con el Asistente
+                </button>
+                <button class="px-8 py-4 rounded-2xl bg-white/15 backdrop-blur-md border border-white/30 text-white font-semibold text-base hover:bg-white/25 hover:scale-105 active:scale-95 transition-all flex items-center gap-3" id="btnGuiaBot" type="button">
+                    <i class="fas fa-graduation-cap text-lg"></i> Tour Guiado Interactivo
+                </button>
+            </div>
+
+            <div class="mt-8 bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 text-left max-w-3xl mx-auto shadow-2xl space-y-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-sparkles text-yellow-400"></i> ¿Nuevo por aquí? ¡Haz el tour guiado!
+                </h3>
+                <ol class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-200 font-medium">
+                    <li class="flex items-center gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                        <i class="fas fa-graduation-cap text-purple-400"></i> Tour interactivo hablado paso a paso
+                    </li>
+                    <li class="flex items-center gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                        <i class="fas fa-microphone text-blue-400"></i> Asistente de voz guiado integrado
+                    </li>
+                    <li class="flex items-center gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                        <i class="fas fa-file-signature text-emerald-400"></i> Escribe <strong>reportar</strong> para abrir un caso
+                    </li>
+                    <li class="flex items-center gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                        <i class="fas fa-search text-amber-400"></i> Seguimiento por <strong>radicado</strong> o correo
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- Legal Framework Section con Tailwind CSS -->
+    <section id="legal" class="py-16 px-4">
+        <div class="max-w-6xl mx-auto space-y-10">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight flex items-center justify-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-purple-100 text-primary flex items-center justify-center shadow-md">
+                        <i class="fas fa-balance-scale"></i>
+                    </span>
+                    Marco Legal Colombiano
+                </h2>
+                <p class="text-slate-500 max-w-2xl mx-auto text-base">Normativa vigente para la prevención y atención de la violencia escolar en Colombia</p>
+            </div>
+            
+            <div class="legal-cards">
+                <div class="legal-card active" data-tab="ley1620">
+                    <div class="legal-card-icon">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <h3>Ley 1620 de 2013</h3>
+                    <p>Sistema Nacional de Convivencia Escolar y Formación para el Ejercicio de los Derechos Humanos</p>
+                    <div class="legal-card-year">2013</div>
+                </div>
+                
+                <div class="legal-card" data-tab="decreto1965">
+                    <div class="legal-card-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h3>Decreto 1965 de 2013</h3>
+                    <p>Reglamentación de la Ley 1620 y establecimiento de la Ruta de Atención Integral</p>
+                    <div class="legal-card-year">2013</div>
+                </div>
+                
+                <div class="legal-card" data-tab="ley1098">
+                    <div class="legal-card-icon">
+                        <i class="fas fa-child"></i>
+                    </div>
+                    <h3>Ley 1098 de 2006</h3>
+                    <p>Código de la Infancia y la Adolescencia - Derechos fundamentales de niños, niñas y adolescentes</p>
+                    <div class="legal-card-year">2006</div>
+                </div>
+                
+                <div class="legal-card" data-tab="ley1581">
+                    <div class="legal-card-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Ley 1581 de 2012</h3>
+                    <p>Protección de Datos Personales - Confidencialidad en el manejo de información</p>
+                    <div class="legal-card-year">2012</div>
+                </div>
+                
+                <div class="legal-card" data-tab="ley599">
+                    <div class="legal-card-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <h3>Ley 599 de 2000</h3>
+                    <p>Código Penal - Tipificación de delitos relacionados con la violencia escolar</p>
+                    <div class="legal-card-year">2000</div>
+                </div>
+                
+                <div class="legal-card" data-tab="ley1146">
+                    <div class="legal-card-icon">
+                        <i class="fas fa-heart-broken"></i>
+                    </div>
+                    <h3>Ley 1146 de 2007</h3>
+                    <p>Prevención de la Violencia Sexual y atención integral de niños, niñas y adolescentes</p>
+                    <div class="legal-card-year">2007</div>
+                </div>
+                
+                <div class="legal-card" data-tab="decreto4727">
+                    <div class="legal-card-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>Decreto 4727 de 2010</h3>
+                    <p>Lineamientos para la atención en salud sexual y reproductiva</p>
+                    <div class="legal-card-year">2010</div>
+                </div>
+            </div>
+            
+            <!-- Ley 1620 de 2013 -->
+            <div class="legal-content active" id="ley1620">
+                <h3>Ley 1620 de 2013</h3>
+                <p><strong>Por la cual se crea el Sistema Nacional de Convivencia Escolar y Formación para el Ejercicio de los Derechos Humanos, la Educación para la Sexualidad y la Prevención y Mitigación de la Violencia Escolar.</strong></p>
+                
+                <h4>Objeto de la Ley</h4>
+                <p>La presente ley tiene por objeto crear el Sistema Nacional de Convivencia Escolar y Formación para el Ejercicio de los Derechos Humanos, la Educación para la Sexualidad y la Prevención y Mitigación de la Violencia Escolar, que contribuya a la formación de ciudadanos activos, aportando a la construcción de una sociedad democrática, participativa, pluralista e intercultural, en concordancia con el mandato constitucional y las recomendaciones internacionales en materia de derechos humanos.</p>
+                
+                <h4>Definiciones Clave</h4>
+                <ul>
+                    <li><strong>Convivencia escolar:</strong> La convivencia escolar es la dinámica de las relaciones que se dan entre los diferentes miembros de una comunidad educativa, construida a partir de la comunicación, la cooperación, la negociación y el acuerdo, con el fin de garantizar el respeto mutuo, la inclusión, la no discriminación y el pleno ejercicio de los derechos humanos.</li>
+                    <li><strong>Violencia escolar:</strong> Toda acción u omisión que atente contra la integridad física, psicológica, sexual y social de un estudiante, cometida por otro estudiante, docente, directivo o personal administrativo de la institución educativa.</li>
+                    <li><strong>Ruta de Atención Integral:</strong> Es el protocolo que define el proceso que deben seguir las instituciones educativas para la atención de los casos de violencia escolar, desde su identificación hasta su resolución.</li>
+                </ul>
+                
+                <div class="legal-article">
+                    <h5>Artículo 3° - Principios</h5>
+                    <p>El Sistema Nacional de Convivencia Escolar se rige por los principios de dignidad, participación, corresponsabilidad, integralidad, diversidad, no discriminación, gradualidad, prevalencia de derechos, interés superior del niño, niña y adolescente, y confidencialidad.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 9° - Corresponsabilidad</h5>
+                    <p>La familia, la sociedad y el Estado son corresponsables de la formación ciudadana, la promoción de la convivencia escolar, la educación para el ejercicio de los derechos humanos, sexuales y reproductivos y la prevención y mitigación de la violencia escolar.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 11° - Comité Escolar de Convivencia</h5>
+                    <p>Todas las instituciones educativas deben conformar un Comité Escolar de Convivencia, encargado de liderar la implementación de la Ruta de Atención Integral y promover la convivencia pacífica.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 17° - Ruta de Atención Integral</h5>
+                    <p>La Ruta de Atención Integral para la convivencia escolar tiene cuatro componentes: promoción, prevención, atención y seguimiento. Debe ser implementada por todas las instituciones educativas del país.</p>
+                </div>
+            </div>
+            
+            <!-- Decreto 1965 de 2013 -->
+            <div class="legal-content" id="decreto1965">
+                <h3>Decreto 1965 de 2013</h3>
+                <p><strong>Por el cual se reglamenta la Ley 1620 de 2013, que crea el Sistema Nacional de Convivencia Escolar y Formación para el Ejercicio de los Derechos Humanos, la Educación para la Sexualidad y la Prevención y Mitigación de la Violencia Escolar.</strong></p>
+                
+                <h4>Objeto del Decreto</h4>
+                <p>Reglamentar la Ley 1620 de 2013, estableciendo las normas para la organización del Sistema Nacional de Convivencia Escolar, la conformación y operación del Comité Escolar de Convivencia, y la implementación de la Ruta de Atención Integral.</p>
+                
+                <h4>Componentes de la Ruta de Atención Integral</h4>
+                <ul>
+                    <li><strong>Promoción:</strong> Acciones orientadas a fortalecer las competencias ciudadanas, la convivencia pacífica y el ejercicio de los derechos humanos.</li>
+                    <li><strong>Prevención:</strong> Estrategias para identificar factores de riesgo y proteger a los estudiantes de posibles situaciones de violencia.</li>
+                    <li><strong>Atención:</strong> Protocolos para la intervención inmediata en casos de violencia escolar, garantizando la protección de la víctima.</li>
+                    <li><strong>Seguimiento:</strong> Monitoreo continuo de los casos para garantizar su resolución y la no repetición de los hechos.</li>
+                </ul>
+                
+                <div class="legal-article">
+                    <h5>Artículo 10° - Conformación del Comité Escolar de Convivencia</h5>
+                    <p>El Comité Escolar de Convivencia estará conformado por: el rector o director, quien lo presidirá; el personero estudiantil; el docente con función de orientación; el coordinador cuando exista este cargo; el presidente del consejo de padres de familia; el presidente del consejo de estudiantes; y un (1) docente por cada nivel educativo que ofrezca la institución.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 28° - Protocolo de Atención</h5>
+                    <p>Las instituciones educativas deben establecer un protocolo de atención para casos de violencia escolar que incluya: mecanismos de reporte, plazos máximos de atención, criterios de remisión a otras entidades, y estrategias de protección para la víctima.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 32° - Registro de Casos</h5>
+                    <p>Todas las instituciones educativas deben llevar un registro de los casos de violencia escolar atendidos, garantizando la confidencialidad de la información y el respeto a los derechos de los estudiantes involucrados.</p>
+                </div>
+            </div>
+            
+            <!-- Ley 1098 de 2006 - Código de la Infancia y la Adolescencia -->
+            <div class="legal-content" id="ley1098">
+                <h3>Ley 1098 de 2006 - Código de la Infancia y la Adolescencia</h3>
+                <p><strong>Por medio de la cual se expide el Código de la Infancia y la Adolescencia.</strong></p>
+                
+                <h4>Objeto del Código</h4>
+                <p>Este código tiene por objeto establecer normas sustantivas y procesales para la protección integral de los niños, las niñas y los adolescentes, garantizar el ejercicio de sus derechos y libertades consagrados en los instrumentos internacionales de Derechos Humanos, en la Constitución Política y en las leyes, así como su restablecimiento.</p>
+                
+                <h4>Derechos Fundamentales</h4>
+                <ul>
+                    <li><strong>Derecho a la vida y a la calidad de vida:</strong> Los niños, niñas y adolescentes tienen derecho a la vida, a una buena calidad de vida y a un ambiente sano.</li>
+                    <li><strong>Derecho a la integridad personal:</strong> No podrán ser sometidos a torturas ni a tratos crueles, inhumanos o degradantes.</li>
+                    <li><strong>Derecho a la educación:</strong> La educación será gratuita y obligatoria desde la primera infancia hasta el grado undécimo.</li>
+                    <li><strong>Derecho a la protección contra la violencia:</strong> Serán protegidos contra toda forma de violencia física, psicológica, sexual y contra el maltrato.</li>
+                </ul>
+                
+                <div class="legal-article">
+                    <h5>Artículo 20 - Obligaciones de la familia, la sociedad y el Estado</h5>
+                    <p>La familia, la sociedad y el Estado tienen la obligación de brindar protección integral a los niños, niñas y adolescentes, garantizando el ejercicio pleno de sus derechos.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 44 - Derecho a la intimidad</h5>
+                    <p>Los niños, niñas y adolescentes tienen derecho a la intimidad personal y familiar, a su buen nombre y a la protección de su imagen.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 52 - Deberes de los niños, niñas y adolescentes</h5>
+                    <p>Entre los deberes se encuentran: respetar a sus padres, educadores y demás personas, participar en la vida familiar y comunitaria, y contribuir al respeto de los derechos de los demás.</p>
+                </div>
+            </div>
+            
+            <!-- Ley 1581 de 2012 - Protección de Datos Personales -->
+            <div class="legal-content" id="ley1581">
+                <h3>Ley 1581 de 2012 - Protección de Datos Personales</h3>
+                <p><strong>Por la cual se dictan disposiciones generales para la protección de datos personales.</strong></p>
+                
+                <h4>Objeto de la Ley</h4>
+                <p>Desarrollar el derecho constitucional que tienen todas las personas a conocer, actualizar y rectificar las informaciones que se hayan recogido sobre ellas en bases de datos o archivos, y los demás derechos, libertades y garantías constitucionales.</p>
+                
+                <h4>Principios de la Protección de Datos</h4>
+                <ul>
+                    <li><strong>Principio de legalidad:</strong> El tratamiento de datos personales es una actividad reglada que debe sujetarse a lo establecido en la ley.</li>
+                    <li><strong>Principio de finalidad:</strong> El tratamiento debe obedecer a una finalidad legítima y ser informada al titular.</li>
+                    <li><strong>Principio de libertad:</strong> El tratamiento sólo puede ejercerse con el consentimiento previo, expreso e informado del titular.</li>
+                    <li><strong>Principio de confidencialidad:</strong> Todas las personas que intervengan en el tratamiento de datos están obligadas a garantizar la reserva de la información.</li>
+                </ul>
+                
+                <div class="legal-article">
+                    <h5>Artículo 6° - Autorización del Titular</h5>
+                    <p>El tratamiento de datos personales requiere la autorización previa, expresa e informada del titular, la cual deberá ser obtenida por cualquier medio que permita su posterior consulta.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 8° - Derechos de los Titulares</h5>
+                    <p>Los titulares de datos personales tienen derecho a conocer, actualizar, rectificar y suprimir su información, así como a revocar la autorización otorgada.</p>
+                </div>
+            </div>
+            
+            <!-- Ley 599 de 2000 - Código Penal -->
+            <div class="legal-content" id="ley599">
+                <h3>Ley 599 de 2000 - Código Penal</h3>
+                <p><strong>Por la cual se expide el Código Penal.</strong></p>
+                
+                <h4>Delitos relacionados con violencia escolar</h4>
+                
+                <div class="legal-article">
+                    <h5>Artículo 104A - Feminicidio</h5>
+                    <p>El que causare la muerte a una mujer, por su condición de ser mujer o por motivos de género, incurrirá en prisión de doscientos cincuenta (250) a quinientos (500) meses.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 116 - Lesiones personales</h5>
+                    <p>El que cause a otro daño en el cuerpo o en la salud, incurrirá en prisión de dieciséis (16) a cincuenta y cuatro (54) meses, dependiendo de la gravedad de las lesiones.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 206 - Acoso sexual</h5>
+                    <p>El que en beneficio suyo o de un tercero realice actos de connotación sexual sobre una persona sin su consentimiento, incurrirá en prisión de uno (1) a tres (3) años.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 210A - Ciberacoso</h5>
+                    <p>El que mediante el uso de tecnologías de la información y las comunicaciones, realice conducta de acoso contra una persona, incurrirá en prisión de uno (1) a tres (3) años.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 134A - Violencia contra servidor público</h5>
+                    <p>El que ejerza violencia contra servidor público que se encuentre en ejercicio de sus funciones, incurrirá en prisión de cuatro (4) a ocho (8) años.</p>
+                </div>
+            </div>
+            
+            <!-- Ley 1146 de 2007 - Prevención Violencia Sexual -->
+            <div class="legal-content" id="ley1146">
+                <h3>Ley 1146 de 2007 - Prevención de la Violencia Sexual</h3>
+                <p><strong>Por medio de la cual se dictan normas para la prevención de la violencia sexual y atención integral de los niños, niñas y adolescentes abusados sexualmente.</strong></p>
+                
+                <h4>Objeto de la Ley</h4>
+                <p>Establecer las normas para la prevención de la violencia sexual y la atención integral de los niños, niñas y adolescentes víctimas de abuso sexual, garantizando su restablecimiento de derechos.</p>
+                
+                <h4>Medidas de Prevención</h4>
+                <ul>
+                    <li>Implementación de programas de educación sexual en las instituciones educativas.</li>
+                    <li>Capacitación a docentes y personal administrativo para identificar señales de abuso sexual.</li>
+                    <li>Creación de líneas de denuncia confidenciales para reportar casos de violencia sexual.</li>
+                    <li>Protocolos de atención inmediata para víctimas de abuso sexual.</li>
+                </ul>
+                
+                <div class="legal-article">
+                    <h5>Artículo 4° - Atención Integral</h5>
+                    <p>El Estado garantizará la atención integral de los niños, niñas y adolescentes víctimas de violencia sexual, incluyendo servicios médicos, psicológicos, legales y sociales.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 8° - Deber de Denuncia</h5>
+                    <p>Los docentes, directivos y personal administrativo de instituciones educativas tienen la obligación de denunciar ante las autoridades competentes los casos de violencia sexual que conozcan en el ejercicio de sus funciones.</p>
+                </div>
+            </div>
+            
+            <!-- Decreto 4727 de 2010 -->
+            <div class="legal-content" id="decreto4727">
+                <h3>Decreto 4727 de 2010 - Salud Sexual y Reproductiva</h3>
+                <p><strong>Por el cual se establecen los lineamientos para la atención en salud sexual y reproductiva en Colombia.</strong></p>
+                
+                <h4>Objeto del Decreto</h4>
+                <p>Establecer los lineamientos técnicos y operativos para la prestación de servicios de salud sexual y reproductiva, garantizando el acceso universal y la calidad en la atención.</p>
+                
+                <h4>Componentes de la Atención</h4>
+                <ul>
+                    <li><strong>Educación sexual:</strong> Programas de educación integral en sexualidad para niños, niñas, adolescentes y jóvenes.</li>
+                    <li><strong>Prevención del embarazo adolescente:</strong> Estrategias para reducir el embarazo no deseado en adolescentes.</li>
+                    <li><strong>Atención de violencia sexual:</strong> Protocolos para la atención médica, psicológica y legal de víctimas de violencia sexual.</li>
+                    <li><strong>Consejería en salud sexual:</strong> Servicios de orientación y consejería en derechos sexuales y reproductivos.</li>
+                </ul>
+                
+                <div class="legal-article">
+                    <h5>Artículo 12° - Atención a Víctimas de Violencia Sexual</h5>
+                    <p>Las entidades prestadoras de salud deben contar con protocolos de atención inmediata para víctimas de violencia sexual, garantizando la confidencialidad y el trato digno.</p>
+                </div>
+                
+                <div class="legal-article">
+                    <h5>Artículo 15° - Educación Sexual en Instituciones Educativas</h5>
+                    <p>Las instituciones educativas deben incorporar en su currículo proyectos pedagógicos de educación sexual, con enfoque de derechos humanos y perspectiva de género.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Toast y demás elementos -->
+    <div id="toastEnviando" class="fixed top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-3 rounded-lg shadow-lg z-[5000] flex items-center gap-2 hidden">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Espere mientras envío información...</span>
+    </div>
+    
+    <div class="email-status" id="emailStatus">
+        <div class="email-status-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>¡Reporte Enviado!</h3>
+        <p>Tu reporte ha sido enviado exitosamente a las autoridades competentes.</p>
+        <button id="closeEmailStatus">Aceptar</button>
+    </div>
+
+    <!-- SIUCE Modal -->
+    <div id="siuceModal" class="fixed inset-0 z-[6000] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-5xl h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-gradient-to-r from-blue-800 to-slate-900 p-4 flex justify-between items-center text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                        <i class="fas fa-shield-halved text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg leading-tight">Plataforma SIUCE</h3>
+                        <p class="text-white/70 text-[10px] uppercase tracking-wider">Reporte Anónimo Oficial - MinEducación</p>
+                    </div>
+                </div>
+                <button id="closeSiuce" class="w-11 h-11 rounded-full hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-3 bg-amber-50 text-amber-800 text-xs text-center border-b border-amber-100 flex items-center justify-center gap-2">
+                <i class="fas fa-info-circle"></i>
+                Esta plataforma permite adjuntar evidencias y garantiza el anonimato total.
+            </div>
+            <div class="flex-1 w-full bg-gray-100">
+                <iframe src="https://siuce.mineducacion.gov.co/siuceanonimo-angular2/" class="w-full h-full border-none"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Estadísticas / Analítica con Tailwind Glassmorphism -->
+    <section id="estadisticas" class="py-16 px-4">
+        <div class="max-w-6xl mx-auto space-y-10">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight flex items-center justify-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-purple-100 text-primary flex items-center justify-center shadow-md">
+                        <i class="fas fa-chart-pie"></i>
+                    </span>
+                    Análisis y Estadísticas de Casos
+                </h2>
+                <p class="text-slate-500 max-w-2xl mx-auto text-base">Monitoreo en tiempo real de los tipos de violencia y reportes en la plataforma de Duitama</p>
+            </div>
+
+            <div id="statsContainer" class="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
+                <div class="md:col-span-7 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-glass hover:shadow-glass-hover transition-all">
+                    <h3 class="text-center font-bold text-slate-800 text-lg mb-6 flex items-center justify-center gap-2">
+                        <i class="fas fa-chart-bar text-primary"></i> Tendencia por Tipo de Violencia
+                    </h3>
+                    <div class="h-72 relative">
+                        <canvas id="chartViolenciaBar"></canvas>
+                    </div>
+                </div>
+
+                <div class="md:col-span-5 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-glass hover:shadow-glass-hover transition-all">
+                    <h3 class="text-center font-bold text-slate-800 text-lg mb-6 flex items-center justify-center gap-2">
+                        <i class="fas fa-chart-donut text-purple-600"></i> Distribución General
+                    </h3>
+                    <div class="h-72 relative">
+                        <canvas id="chartViolenciaPie"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Consultar Casos con Tailwind Glassmorphism -->
+    <section id="consultar-casos" class="py-16 px-4">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight flex items-center justify-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-md">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    Consultar Estado de tu Caso
+                </h2>
+                <p class="text-slate-500 text-base max-w-xl mx-auto">Busca por correo electrónico o por número de radicado para ver el estado en tiempo real</p>
+            </div>
+            
+            <div class="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-glass space-y-6">
+                <div class="flex flex-wrap items-end gap-4">
+                    <div class="w-full sm:w-44">
+                        <label for="tipoBusqueda" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Buscar por</label>
+                        <select id="tipoBusqueda" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 font-semibold text-sm transition-all cursor-pointer">
+                            <option value="correo">Correo Electrónico</option>
+                            <option value="radicado">Número de Radicado</option>
+                        </select>
+                    </div>
+                    <div class="flex-1 min-w-[240px]">
+                        <label for="buscarCasos" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Ingresa el Valor</label>
+                        <input type="text" id="buscarCasos" placeholder="ejemplo@correo.com o DUIT-20250115-0001" 
+                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 text-sm transition-all">
+                    </div>
+                    <button type="button" id="btnBuscarCasos" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-sm shadow-md hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-search"></i> Buscar Caso
+                    </button>
+                </div>
+            
+                <div id="casosResultado" class="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+                    <p id="casosMensaje" class="p-8 text-center text-slate-500 text-sm font-medium">Selecciona si buscas por correo o radicado, ingresa el valor y haz clic en Buscar.</p>
+                    <table id="tablaCasos" class="tabla-casos hidden w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-primary to-purple-600 text-white text-xs uppercase tracking-wider">
+                                <th class="p-4 font-bold">Radicado</th>
+                                <th class="p-4 font-bold">Estado</th>
+                                <th class="p-4 font-bold">Tipo</th>
+                                <th class="p-4 font-bold">Institución</th>
+                                <th class="p-4 font-bold">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCasosBody" class="divide-y divide-slate-100 text-sm">
+                        </tbody>
+                    </table>
+                    <div id="paginacionCasos" class="paginacion-casos hidden p-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs">
+                        <span id="paginacionInfo" class="text-slate-500 font-medium"></span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btnPagAnterior" class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold disabled:opacity-40" disabled><i class="fas fa-chevron-left mr-1"></i> Anterior</button>
+                            <span id="paginaActual" class="font-bold text-primary px-2"></span>
+                            <button type="button" id="btnPagSiguiente" class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold"><i class="fas fa-chevron-right ml-1"></i> Siguiente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Contacto con Tailwind Glassmorphism -->
+    <section id="contact" class="py-16 px-4">
+        <div class="max-w-3xl mx-auto space-y-8">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight flex items-center justify-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-purple-100 text-primary flex items-center justify-center shadow-md">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    Contáctanos
+                </h2>
+                <p class="text-slate-500 text-base max-w-lg mx-auto">¿Tienes alguna consulta o sugerencia? Escríbenos y te responderemos a la brevedad.</p>
+            </div>
+            
+            <form id="contactForm" class="bg-white/80 backdrop-blur-md p-8 rounded-3xl border border-slate-100 shadow-glass space-y-6">
+                <div class="space-y-2">
+                    <label for="contactEmail" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Tu correo electrónico *</label>
+                    <input type="email" id="contactEmail" name="email" required 
+                        placeholder="ejemplo@correo.com"
+                        class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 text-sm transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label for="contactMessage" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Tu consulta o mensaje *</label>
+                    <textarea id="contactMessage" name="message" required rows="4" 
+                        placeholder="Escribe aquí lo que deseas consultar..."
+                        class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-slate-700 text-sm transition-all resize-y"></textarea>
+                </div>
+                <button type="submit" id="contactSubmit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-base shadow-3d hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                    <i class="fas fa-paper-plane"></i> Enviar Consulta
+                </button>
+                <p id="contactStatus" class="mt-4 text-center text-sm font-medium hidden"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer Moderno -->
+    <footer class="bg-slate-900 text-slate-300 py-12 px-4 border-t border-slate-800 mt-16">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div class="flex items-center gap-3 font-bold text-white text-lg">
+                <div class="w-10 h-10 rounded-2xl bg-primary/30 flex items-center justify-center text-primary text-xl border border-primary/40">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span>Asistente Virtual Anti-Violencia Escolar - Duitama</span>
+            </div>
+            
+            <div class="flex items-center gap-6 font-semibold text-sm">
+                <a href="#contact" class="hover:text-purple-400 transition-colors">Contacto</a>
+                <a href="#legal" class="hover:text-purple-400 transition-colors">Marco Legal</a>
+            </div>
+        </div>
+        
+        <div class="max-w-6xl mx-auto mt-8 pt-6 border-t border-slate-800/60 text-center text-xs text-slate-500 font-medium">
+            <p>© <span id="currentYear"></span> - Todos los derechos reservados • <strong>Creado por Jorge Leonardo Suarez Cortes</strong>. Conforme a la normativa colombiana.</p>
+            <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
+        </div>
+    </footer>
+
+    <!-- Chatbot 3D Rediseñado (Flotante Fijo Global) -->
+    <div class="chatbot-container">
+        <div id="chatbotToggle" class="chatbot-toggle" title="Abrir Chatbot de Asistencia Legal">
+            <img src="XuJuDXrePh.gif" alt="Asistente Bot" class="w-full h-full object-cover rounded-full pointer-events-none" style="background-color: transparent;">
+            <div id="chatbotBadge" class="chatbot-badge hidden">1</div>
+        </div>
+        
+        <div id="chatbotBox" class="chatbot-box">
+            <div class="bg-gradient-to-r from-primary via-purple-600 to-accent p-4 flex justify-between items-center shadow-md relative z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border-2 border-white/40 shadow-inner flex-shrink-0">
+                        <img src="XuJuDXrePh.gif" alt="IA" class="w-full h-full object-cover rounded-full" style="background: transparent;">
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-base tracking-wide flex items-center gap-2">
+                            Asistente IA Legal 
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="En línea"></span>
+                        </h3>
+                        <p class="text-white/90 text-xs font-medium">Anti-Violencia Escolar • Ley 1620</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button id="voiceToggle" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 flex items-center justify-center text-white transition-all backdrop-blur-sm" title="Activar voz">
+                        <i class="fas fa-volume-up text-sm"></i>
+                    </button>
+                    <button id="chatbotClose" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 flex items-center justify-center text-white text-2xl leading-none transition-all backdrop-blur-sm hover:rotate-90">&times;</button>
+                </div>
+            </div>
+            
+            <div id="chatbotMessages" class="flex-1 overflow-y-auto p-4 bg-slate-50/70 space-y-4">
+                <!-- Mensajes del chat -->
+            </div>
+            
+            <div id="chatbotFormContainer" class="hidden border-t border-gray-100 bg-white/90 p-3.5 backdrop-blur-md">
+                <form id="chatbotForm" class="space-y-3">
+                    <div id="formFieldContainer"></div>
+                    <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-semibold text-sm shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.98] transition-all">
+                        <i class="fas fa-arrow-right mr-2"></i> Continuar
+                    </button>
+                </form>
+            </div>
+            
+            <div id="chatbotInputArea" class="p-3 border-t border-gray-100 bg-white/90 flex items-center gap-2 relative backdrop-blur-md">
+                <div id="emojiPicker" class="hidden absolute bottom-16 left-4 bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-3 grid grid-cols-6 gap-2 shadow-2xl z-50">
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">😊</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">👍</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">🤝</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">🛡️</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">📚</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">⚖️</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">❤️</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">🙏</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">💡</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">📌</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">🔍</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">✨</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">💬</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">✍️</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">📄</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">🎓</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">🏫</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition-transform p-1">⭐</span>
+                </div>
+                <button id="voiceInputBtn" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-all flex-shrink-0" title="Entrada de Voz">
+                    <span class="material-symbols-rounded text-xl">mic</span>
+                </button>
+                <button id="emojiBtn" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-all flex-shrink-0" title="Insertar Emojis">
+                    <span class="material-symbols-rounded text-xl">mood</span>
+                </button>
+                <input type="text" id="chatbotInput" placeholder="Escribe o habla tu consulta..." class="flex-1 px-4 py-2.5 rounded-full border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm bg-slate-50/50 focus:bg-white text-slate-800">
+                <button id="sendMessage" class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-purple-600 flex items-center justify-center text-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all flex-shrink-0" title="Enviar Mensaje">
+                    <span class="material-symbols-rounded text-lg">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script src="stats.js"></script>
+    <script src="tour-guide.js"></script>
+    
+    <script>
+        // Script para manejar las pestañas de contenido legal
+        document.querySelectorAll('.legal-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const tabId = card.getAttribute('data-tab');
+                
+                // Remover clase active de todas las cards
+                document.querySelectorAll('.legal-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                // Ocultar todos los contenidos
+                document.querySelectorAll('.legal-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Mostrar el contenido seleccionado
+                const activeContent = document.getElementById(tabId);
+                if (activeContent) {
+                    activeContent.classList.add('active');
+                }
+            });
+        });
+        
+        // Inicializar el chat cuando se carga la página
+        window.addEventListener('load', function() {
+            console.log('✅ Todos los scripts cargados');
+            
+            // Elementos del chatbot
+            const chatbotToggle = document.getElementById('chatbotToggle');
+            const chatbotBox = document.getElementById('chatbotBox');
+            const chatbotClose = document.getElementById('chatbotClose');
+            const openChatbot = document.getElementById('openChatbot');
+            
+            if (chatbotToggle && chatbotBox && chatbotClose) {
+                chatbotToggle.addEventListener('click', () => {
+                    chatbotBox.style.display = 'flex';
+                });
+                
+                chatbotClose.addEventListener('click', () => {
+                    chatbotBox.style.display = 'none';
+                });
+                
+                if (openChatbot) {
+                    openChatbot.addEventListener('click', () => {
+                        chatbotBox.style.display = 'flex';
+                    });
+                }
+            }
+            
+            // Inicializar el tour si existe
+            if (typeof TourGuide !== 'undefined') {
+                console.log('<i class="fas fa-bullseye text-primary mr-2"></i> TourGuide disponible');
+            }
+        });
+    </script>
+
+    <script>
+        // Global sound variable
+        window.globalSoundEnabled = true;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const btnSound = document.getElementById('btn-toggle-sound');
+            const iconSound = document.getElementById('icon-sound');
+            const btnContrast = document.getElementById('btn-toggle-contrast');
+            const btnIncText = document.getElementById('btn-increase-text');
+            const btnDecText = document.getElementById('btn-decrease-text');
+
+            // Sound Toggle
+            btnSound.addEventListener('click', () => {
+                window.globalSoundEnabled = !window.globalSoundEnabled;
+                if (window.globalSoundEnabled) {
+                    iconSound.className = 'fas fa-volume-up';
+                } else {
+                    iconSound.className = 'fas fa-volume-mute';
+                }
+            });
+
+            // High Contrast Toggle
+            btnContrast.addEventListener('click', () => {
+                document.body.classList.toggle('high-contrast');
+            });
+
+            // Text Size Adjustments
+            let currentFontSize = 100; // percentage
+            btnIncText.addEventListener('click', () => {
+                if(currentFontSize < 150) {
+                    currentFontSize += 10;
+                    document.body.style.fontSize = currentFontSize + '%';
+                }
+            });
+            
+            btnDecText.addEventListener('click', () => {
+                if(currentFontSize > 80) {
+                    currentFontSize -= 10;
+                    document.body.style.fontSize = currentFontSize + '%';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

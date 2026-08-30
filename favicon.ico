@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 
+    Favicon para Agente IA de Violencia Escolar
+    Concepto: Escudo de Protección con Corazón y Diálogo
+    Optimizado para tamaños pequeños.
+  -->
+  <circle cx="50" cy="50" r="48" fill="#f0f4f8" stroke="#2d3748" stroke-width="2"/>
+  <path d="M50 15 L70 25 L70 50 Q70 70, 50 85 Q30 70, 30 50 L30 25 Z" fill="#4299e1" stroke="#2b6cb0" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M35 45 C35 36, 42 29, 50 29 C56 29, 61 33, 63 38 C65 33, 70 29, 76 29 C84 29, 91 36, 91 45 C91 57, 79 68, 63 79 C47 68, 35 57, 35 45 Z" fill="#ffffff" stroke="#e53e3e" stroke-width="2.5" stroke-linejoin="round" transform="translate(-13, 6) scale(0.8)"/>
+</svg>
